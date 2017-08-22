@@ -108,11 +108,22 @@ static void parseSimpleTag (const unsigned char *cp, erlangKind kind)
 	vStringDelete (identifier);
 }
 
+static void prefix_with_module (vString *const funname, vString *const module) {
+        int size = module->length + funname->length +2;
+        char * buff = xMalloc (size, char);
+        strcpy(buff, module->buffer);
+        strcpy(buff+module->length, ":");
+        strcpy(buff+1+module->length, funname->buffer);
+        funname -> buffer = buff;
+}
+
 static void parseFunctionTag (const unsigned char *cp, vString *const module)
 {
 	vString *const identifier = vStringNew ();
 	parseIdentifier (cp, identifier);
-	makeMemberTag (identifier, K_FUNCTION, module);
+  makeMemberTag (identifier, K_FUNCTION, module);
+  prefix_with_module(identifier, module);
+  makeMemberTag (identifier, K_FUNCTION, module);
 	vStringDelete (identifier);
 }
 
@@ -148,7 +159,7 @@ static void parseDirective (const unsigned char *cp, vString *const module)
 	else if (strcmp (drtv, "module") == 0)
 		parseModuleTag (cp, module);
 	/* Otherwise, it was an import, export, etc. */
-	
+
 	vStringDelete (directive);
 }
 
